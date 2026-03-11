@@ -14,12 +14,13 @@ async function run() {
             cache = JSON.parse(fs.readFileSync(CACHE_FILE, 'utf8'));
         }
 
-        // 2. Fetch from Apple Music
+      // 2. Fetch from Apple Music
         const appleUrl = 'https://api.music.apple.com/v1/me/recent/played/tracks?limit=30';
         const appleRes = await fetch(appleUrl, {
             headers: {
                 'Authorization': `Bearer ${APPLE_DEV_TOKEN}`,
-                'Music-User-Token': APPLE_USER_TOKEN
+                'Music-User-Token': APPLE_USER_TOKEN,
+                'Origin': 'https://music.apple.com'
             }
         });
         
