@@ -1,0 +1,38 @@
+name: Ghost Poller (Last.fm)
+
+on:
+  schedule:
+    - cron: '*/5 * * * *' # Runs every 5 minutes
+  workflow_dispatch: # Allows you to trigger it manually via a button
+
+jobs:
+  scrobble:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Crucial: Allows the bot to commit the cache file
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run Scrobbler
+        env:
+          APPLE_DEV_TOKEN: ${{ secrets.APPLE_DEV_TOKEN }}
+          APPLE_USER_TOKEN: ${{ secrets.APPLE_USER_TOKEN }}
+          LASTFM_API_KEY: ${{ secrets.LASTFM_API_KEY }}
+          LASTFM_SHARED_SECRET: ${{ secrets.LASTFM_SHARED_SECRET }}
+          LASTFM_SK: ${{ secrets.LASTFM_SK }}
+        run: node scrobbler.js
+
+      - name: Commit Cache File
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add cache.json
+          # Only commit if the cache file actually changed
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Update scrobble cache" && git push)
